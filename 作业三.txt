@@ -1,0 +1,311 @@
+//作业1（闭包、扩展、泛型）
+//（1）给定一个Dictionary，Dictionary包含key值name和age，
+     //用map函数返回age字符串数组;
+     let dic = [["name":"zhaoyi","age":"18"],["name":"qianer","age":"19"],["name":"sunyi","age":"20"]]
+     let str = dic.map({$0["name"]!})//返回字典数组中每个字典元素的"name"对应的值
+     print(str)  //输出["zhaoyi", "qianer", "sunyi"]
+
+//（2）	给定一个String数组，用filter函数选出能被转成Int的字符串
+     let arr1 = ["gshdfb", "dsa3ds", "17737206852", "123"]
+     let arr2 = arr1.filter( { Int($0) != nil } )  //先将字符串元素强转为Int?，如果值为nil，则表示该字符串不能转换成Int
+     print(arr2)  //输出["17737206852", "123"]
+
+//（3）	用reduce函数把String数组中元素连接成一个字符串，以逗号分隔
+     let arr3 = ["gshdfb", "dsa3ds", "17737206852"]
+     var str1 = arr3.reduce("", { $0 + "," + $1 }) //将字符串数组整合
+     str1.remove(at: str1.startIndex)  //因为整合结果的字符串的第一个字符为","，所以需要将这个","移除
+     print(str1)  //输出gshdfb, dsa3ds, 17737206852
+
+
+//（4）	用 reduce 方法一次求出整数数组的最大值、最小值、总数和
+     let intArr = [1,2,3,4,5]
+     let tuple = intArr.reduce((max: intArr[0], min: intArr[0], sum: 0), { (max: max($0.max, $1), min: min($0.min, $1), sum: $0.sum + $1) })
+     print(tuple)
+
+
+//（5）	新建一个函数数组，函数数组里面保存了不同函数类型的函数，
+        //要求从数组里找出参数为一个整数，返回值为一个整数的所有函数；
+func f1(a: Int) -> Int {
+	return a
+	}  //函数类型为(Int) -> Int
+func f2(a: String) -> Int {
+    return Int(a)!
+}  //函数类型为(String) -> Int
+func f3() -> Int {
+    return 2
+}  //函数类型为() -> Int
+
+func f4(a: Int) {
+
+}  //函数类型为(Int) -> Void
+
+func f5(a: Int) -> Int {
+    return a + 1
+}  //函数类型为(Int) -> Int
+let funArr: [Any] = [f1, f2, f3, f4, f5]
+for (index, value) in funArr.enumerated() { //因为循环过程中需要设
+	//计到数组的下标，要将数组元素一一列举出来，所以需要调用数组的enumerated()方法。
+	if value is (Int) -> Int {
+    print(index)  //输出类型为(Int) -> Int的函数在数组中的下标
+    }
+}  //输出结果为0 (换行)  4
+
+
+//（6）	扩展Int，增加sqrt方法，可以计算Int的Sqrt值并返回浮点数，进行验证；
+/*import func Darwin.sqrt
+extension Int {
+    //因为直接使用系统的sqrt(Double)函数会与扩展中定义的函数冲突，所以需要指定系统函数的框架
+    /// 求平方根
+    /// - Returns: 返回该Int型数据的平方根
+    func sqrt() -> Double {
+        return Darwin.sqrt(Double(self))
+    }
+}
+print(9.sqrt())  //输出3.0
+*/
+
+//（7）	实现一个支持泛型的函数，该函数接受任意个变量并返回最大和最小值，
+        //分别传入整数值、浮点数值、字符串进行验证。
+//自定义泛型函数，因为需要比较大小，所以该泛型需要遵循Comparable协议，函数参数为可变参数
+/// 返回参数中的最大值和最小值
+/// - Parameter a: 一组可以直接比较大小的值
+/// - Returns: 返回一个元组，第一个值为最大值，第二个值为最小值
+func getMaxAndMin<T: Comparable>(a: T...) -> (T, T) {
+    var max = a[0]
+    var min = a[0]
+    for item in a {
+        if item > max {
+            max = item
+        } else if item < min {
+            min = item
+        }
+    }
+    return (max, min)
+}
+print(getMaxAndMin(a: 1, 2, 3, 4, 5, 8))  //输出(8, 1)
+print(getMaxAndMin(a: 1.0, 2.0, 3.0, 4.0, 5.0, 6.0))  //输出(6.0, 1.0)
+print(getMaxAndMin(a: "a", "b", "A", "gghdn"))  //输出("gghdn", "a")
+
+
+
+
+//作业2:（枚举、类、派生、协议）(红色字体为新增内容)
+
+//性别的枚举
+enum Gender: Int {
+  case male
+  case famale
+  case unknow
+  //重载>操作符，方便后面排序使用
+  static func >(lhs: Gender,rhs: Gender)->Bool {
+  return lhs.rawValue < rhs.rawValue
+ }
+}
+
+//公寓的枚举
+enum Department{
+  case one,two,three
+}
+
+//学校协议
+protocol SchoolProtocol{
+  var department: Department { get set }
+  func lendBook()
+}
+
+//定义Person类
+//人类
+class Person: CustomStringConvertible {
+  var firstName: String 
+  var lastName: String
+  var age: Int
+  var gender: Gender
+  var fullName: String{
+    get {
+      return firstName+lastName
+   }
+ }
+
+  //构造方法
+  init(firstName: String,lastName: String,age: Int,gender: Gender){
+    self.firstName=firstName
+    self.lastName=lastName
+    self.age=age
+    self.gender=gender
+ }
+
+  convenience init(firstName: String,age: Int,gender: Gender){
+    self.init(firstName: firstName,lastName: "",age: age,gender: gender)
+  }
+
+  convenience init(firstName: String){
+    self.init(firstName: firstName,age: 0,gender: Gender.unknow)
+  }
+  
+  required convenience init(){
+    self.init(firstName: "")
+  }
+	
+	//重载==
+  static func ==(lhs: Person,rhs: Person)->Bool{
+    return lhs.fullName==rhs.fullName && lhs.age==rhs.age && lhs.gender==rhs.gender
+  }
+  //重载!=
+  static func !=(lhs: Person,rhs: Person)->Bool{
+    return !(lhs==rhs)
+  }
+	//实现CustomStringConvertible协议中的计算属性，可以使用print直接输出对象内容
+  var description: String{
+    return "fullName: \(self.fullName),age: \(self.age),gender: \(self.gender)"
+  }
+  //输出Person xxx is running
+  func run(){
+     print("Person \(self.fullName) is running")
+  }
+}	
+var p1=Person(firstName: "zhang")
+var p2=Person(firstName: "zhang",age:20,gender: Gender.male)
+print(p1)  //输出fullName: 张， age:20,gender: male
+print(p1 == p2)
+print(p1 != p2)
+
+
+//定义Teacher类
+class Teacher: Person{
+  var title: String
+  var department: Department
+
+  init(title:String,firstName: String,lastName: String,age: Int,gender: Gender,department: Department){
+     self.title=title
+     self.department=department
+     super.init(firstName: firstName,lastName: lastName,age: age,gender: gender)
+  }
+  init(title: String,department: Department){
+     self.title=title
+     self.department=department
+     super.init(firstName:"",lastName:"",age: 0,gender:Gender.unknow)
+  }
+  convenience required init(){
+     self.init(title:"",department: Department.one)
+  }
+  //重写父类的计算属性
+  override var description: String{ 
+    return "title:\(self.title),fullName: \(self.fullName),age: \(self.age),gender: \(self.gender),department: \(self.department)"
+  }
+  //重写父类run方法
+  override func run(){
+    print("Teacher \(self.fullName) is running")
+  }
+  //遵循协议的方法
+  func lendBook() {
+    print("Teacher \(self.fullName) lend a book")
+  }
+}
+  var t1=Teacher(title:"hello", department: Department.one)
+  print(t1)
+
+
+//定义Student类
+class Student: Person{
+  var stuNo: Int
+  var department: Department
+
+  //构造方法
+  init(stuNo: Int,firstName: String,lastName: String,age: Int,gender: Gender,department: Department){
+     self.stuNo=stuNo
+     self.department=department
+     super.init(firstName: firstName,lastName: lastName,age: age,gender: gender)
+  }
+  init(stuNo: Int,department: Department){
+     self.stuNo=stuNo
+     self.department=department
+     super.init(firstName:"",lastName:"",age: 0,gender:Gender.unknow)
+  }
+  convenience required init(){
+     self.init(stuNo:0,department: Department.one)
+  }
+  //重写父类的计算属性
+  override var description: String{ 
+    return "stuNo:\(self.stuNo),fullName: \(self.fullName),age: \(self.age),gender: \(self.gender),department: \(self.department)"
+  }
+  //重写父类run方法
+  override func run(){
+    print("Student \(self.fullName) is running")
+  }
+  //遵循协议的方法
+  func lendBook() {
+    print("Student \(self.fullName) lend a book")
+  }
+}
+  var s1=Student(stuNo:2016110307,department: Department.two)
+  print(s1)
+
+//初始化一个空的Person数组
+var array=[Person]()
+
+//生成5个Person对象
+for i in 1...5{
+  let temp=Person(firstName: "zhang",lastName: "\(i)",age: 20,gender: Gender.male)
+  array.append(temp)
+}
+//生成5个Teacher对象
+for i in 1...5{
+  let temp=Teacher(title: "hhh",firstName: "zhao",lastName: "\(i)",age: 20,gender: Gender.male,department: Department.one)
+  array.append(temp)
+}
+//生成5个Student对象
+for i in 1...5{
+  let temp=Student(stuNo: 201611030+i,firstName: "qian",lastName: "\(i)",age: 20,gender: Gender.male,department: Department.two)
+  array.append(temp)
+}
+
+//定义一个字典
+var dict=["Person":0,"Teacher":0,"Student":0]
+
+for item in array{
+  if item is Teacher{
+   dict["Teacher"]!+=1
+  }else if item is Student {
+   dict["Student"]!+=1
+  }else {
+   dict["Person"]!+=1
+  }
+}
+
+//输出字典值
+for (key,value) in dict{
+  print("\(key) has \(value) items")
+}
+
+//原始数组
+for item in array{
+  print(item)
+}
+
+//根据age从大到小排序
+array.sort{return $0.age>$1.age}
+for item in array{
+  print(item)
+}
+
+//根据全名从前到后排序
+array.sort{return $0.fullName<$1.fullName}
+for item in array{
+  print(item)
+}
+
+//根据gender和age从大到小排序
+array.sort{return ($0.gender>$1.gender)&&($0.age>$1.age)}
+for item in array{
+  print(item)
+}
+
+//穷举，调用run方法和lendBook方法
+for item in array{
+  item.run()
+  if let teacher = item as? Teacher {
+    teacher.lendBook()
+  }else if let student = item as? Student {
+    student.lendBook()
+  }
+}
