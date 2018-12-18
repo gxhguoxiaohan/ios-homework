@@ -1,0 +1,47 @@
+//
+//  SecondViewController.swift
+//  郭小寒1
+//
+//  Created by student on 2018/11/10.
+//  Copyright © 2018年 XTX. All rights reserved.
+//
+
+import UIKit
+class SecondViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor.green
+        let imageView = UIImageView(frame: CGRect(x: 0, y: 100, width: 400, height: 400))
+        imageView.image =  UIImage(named: "light")
+        view.addSubview(imageView)
+        let button = UIButton(frame: CGRect(x: 100, y: 100, width: 200, height: 20))
+        button.setTitle("close Me", for: .normal)
+        //        button.setTitle("I am focused", for: .highlighted)
+        button.setTitleColor(UIColor.red, for: .normal)
+        view.addSubview(button)
+        
+        button.addTarget(self, action: #selector(btnClicked), for: .touchUpInside)
+        self.title = "Second"
+        // Do any additional setup after loading the view.
+        
+        let myView = UIView(frame: CGRect(x: 10, y: 250, width: 390, height: 300))
+        myView.backgroundColor = UIColor.yellow
+        self.view.addSubview(myView)
+    }
+    @IBAction func btnClicked() {
+              presentingViewController?.dismiss(animated: true, completion: nil)
+       navigationController?.pushViewController(ViewController(), animated: true)
+    }
+    
+    /*
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destination.
+     // Pass the selected object to the new view controller.
+     }
+     */
+    
+}
